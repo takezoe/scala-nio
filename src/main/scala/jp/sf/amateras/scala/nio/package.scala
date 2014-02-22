@@ -1,5 +1,6 @@
 package jp.sf.amateras.scala
 
+import java.io._
 import scala.language.implicitConversions
 
 package object nio {
@@ -44,6 +45,16 @@ package object nio {
         case ex: Exception =>
       }
     }
+  }
+
+  implicit class FileOps(file: File){
+    def readAsBytes() = FileUtils.readAsBytes(file)
+    def readAsString(charset: String = "UTF-8") = FileUtils.readAsString(file, charset)
+    def write(content: Array[Byte]) = FileUtils.write(file, content)
+    def write(content: String, charset: String = "UTF-8") = FileUtils.write(file, content, charset)
+    def remove() = FileUtils.remove(file)
+    def moveTo(dest: File) = FileUtils.move(file, dest)
+    def copyTo(dest: File) = FileUtils.copy(file, dest)
   }
 
 }

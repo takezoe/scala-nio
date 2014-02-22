@@ -10,9 +10,9 @@ object FileUtils {
   /**
    * Delete file or directory. If the given file is a directory, this method delete it recursively.
    */
-  def delete(file: File): Unit = {
+  def remove(file: File): Unit = {
     file match {
-      case dir if dir.isDirectory() => dir.listFiles().foreach(delete _)
+      case dir if dir.isDirectory() => dir.listFiles().foreach(remove _)
       case _ =>
     }
     if(!file.delete()){
@@ -27,7 +27,7 @@ object FileUtils {
   def move(file: File, dest: File): Unit = {
     if(!file.renameTo(dest)){
       copy(file, dest)
-      delete(file)
+      remove(file)
     }
   }
 
