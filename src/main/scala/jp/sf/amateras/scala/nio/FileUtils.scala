@@ -68,7 +68,7 @@ object FileUtils {
    * @param file the file
    * @return the file content as byte array
    */
-  def readFileAsBytes(file: File): Array[Byte] = {
+  def readAsBytes(file: File): Array[Byte] = {
     using(new FileInputStream(file), new ByteArrayOutputStream()){ (in, out) =>
       copyStream(in, out)
       out.toByteArray
@@ -82,6 +82,23 @@ object FileUtils {
    * @param charset the character encoding, default is UTF-8.
    * @return the file content as string
    */
-  def readFileAsString(file: File, charset: String = "UTF-8"): String = new String(readFileAsBytes(file), charset)
+  def readAsString(file: File, charset: String = "UTF-8"): String = new String(readAsBytes(file), charset)
+
+  /**
+   * Write byte array to file.
+   *
+   * @param file the file
+   * @param content the file content as byte array
+   */
+  def write(file: File, content: Array[Byte]): Unit = using(new FileOutputStream(file))(_.write(content))
+
+  /**
+   * Write string to file.
+   *
+   * @param file the file
+   * @param content the file content as string
+   * @param charset the character encoding, default is UTF-8.
+   */
+  def write(file: File, content: String, charset: String = "UTF-8"): Unit = write(file, content.getBytes(charset))
 
 }
