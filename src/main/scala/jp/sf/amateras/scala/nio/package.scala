@@ -1,5 +1,7 @@
 package jp.sf.amateras.scala
 
+import scala.language.implicitConversions
+
 package object nio {
 
   def using[A, Z](r1: CloseableResource[A])(action: (A) => Z): Z = try {
