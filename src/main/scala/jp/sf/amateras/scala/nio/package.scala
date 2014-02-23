@@ -59,6 +59,7 @@ package object nio {
     def copyTo(dest: File) = FileUtils.copy(file, dest)
     def lines(charset: String = "UTF-8") = FileUtils.readLines(file, charset)
     def bytes(chunkSize: Int = 1024 * 8) = FileUtils.readBytes(file, chunkSize)
+    def findFile(condition: (File) => Boolean) = FileUtils.findFile(file)(condition)
   }
 
 }

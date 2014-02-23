@@ -25,11 +25,9 @@ object FileUtils {
    * Move file or directory. This method tries to move using [[java.io.File#renameTo(java.io.File)]] at first.
    * If failed to rename, move by combination of copy and delete.
    */
-  def move(file: File, dest: File): Unit = {
-    if(!file.renameTo(dest)){
-      copy(file, dest)
-      remove(file)
-    }
+  def move(file: File, dest: File): Unit = if(!file.renameTo(dest)){
+    copy(file, dest)
+    remove(file)
   }
 
   /**
@@ -38,17 +36,15 @@ object FileUtils {
    * @param file the source file or directory
    * @param dest the destination file or directory
    */
-  def copy(file: File, dest: File): Unit = {
-    file match {
-      case x if x.isDirectory => x.listFiles.foreach { child =>
-        copy(child, new File(dest, child.getName))
-        if(!dest.mkdir()){
-          throw new IOException(s"Failed to create directory ${dest.getAbsolutePath}")
-        }
+  def copy(file: File, dest: File): Unit = file match {
+    case x if x.isDirectory => x.listFiles.foreach { child =>
+      copy(child, new File(dest, child.getName))
+      if(!dest.mkdir()){
+        throw new IOException(s"Failed to create directory ${dest.getAbsolutePath}")
       }
-      case x => using(new FileInputStream(x), new FileOutputStream(dest)){ case (in, out) =>
-        copyStream(in, out)
-      }
+    }
+    case x => using(new FileInputStream(x), new FileOutputStream(dest)){ case (in, out) =>
+      copyStream(in, out)
     }
   }
 
@@ -69,12 +65,11 @@ object FileUtils {
    * @param file the file
    * @return the file content as byte array
    */
-  def readAsBytes(file: File): Array[Byte] = {
+  def readAsBytes(file: File): Array[Byte] =
     using(new FileInputStream(file), new ByteArrayOutputStream()){ (in, out) =>
       copyStream(in, out)
       out.toByteArray
     }
-  }
 
   /**
    * Read file content as string.
@@ -149,11 +144,14 @@ object FileUtils {
     readBytesStream
   }
 
-  def getExtension(file: File): Option[String] = {
-    file.getName.lastIndexOf('.') match {
-      case -1 => None
-      case i  => Some(file.getName.substring(i + 1))
-    }
+  def getExtension(file: File): Option[String] = file.getName.lastIndexOf('.') match {
+    case -1 => None
+    case i  => Some(file.getName.substring(i + 1))
+  }
+
+  def findFile(dir: File)(condition: (File) => Boolean): Seq[File] = dir match {
+    case x if x.isDirectory => x.listFiles.toSeq.flatMap(findFile(_)(condition))
+    case x => if(condition(x)) Seq(x) else Nil
   }
 
 }
