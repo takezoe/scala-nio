@@ -5,20 +5,20 @@ import scala.language.implicitConversions
 
 package object nio {
 
-  def using[A, Z](r1: CloseableResource[A])(action: (A) => Z): Z = try {
+  def using[A, Z](r1: Resource[A])(action: (A) => Z): Z = try {
     action(r1.resource)
   } finally {
     r1.close()
   }
 
-  def using[A, B, Z](r1: CloseableResource[A], r2: CloseableResource[B])(action: (A, B) => Z): Z = try {
+  def using[A, B, Z](r1: Resource[A], r2: Resource[B])(action: (A, B) => Z): Z = try {
     action(r1.resource, r2.resource)
   } finally {
     r1.close()
     r2.close()
   }
 
-  def using[A, B, C, Z](r1: CloseableResource[A], r2: CloseableResource[B], r3: CloseableResource[C])(action: (A, B, C) => Z): Z = try {
+  def using[A, B, C, Z](r1: Resource[A], r2: Resource[B], r3: Resource[C])(action: (A, B, C) => Z): Z = try {
     action(r1.resource, r2.resource, r3.resource)
   } finally {
     r1.close()
@@ -27,9 +27,28 @@ package object nio {
   }
 
   /**
-   * Provides implicit conversion to [[jp.sf.amateras.scala.nio.CloseableResource]] for [[java.lang.AutoCloseable]].
+   * Trait for closeable resources in scala-nio.
+   *
+   * @tparam T type of the original resource
    */
-  implicit def AutoCloseableResource[T <: AutoCloseable](closeable: T) = new CloseableResource[T](){
+  trait Resource[T] {
+
+    /**
+     * the original resource
+     */
+    val resource: T
+
+    /**
+     * Close this resource.
+     */
+    def close(): Unit
+
+  }
+
+  /**
+   * Provides implicit conversion to [[jp.sf.amateras.scala.nio.Resource]] for [[java.lang.AutoCloseable]].
+   */
+  implicit def AutoCloseableResource[T <: AutoCloseable](closeable: T) = new Resource[T](){
     val resource = closeable
     def close() = closeQuietly(closeable)
   }
@@ -47,6 +66,10 @@ package object nio {
     }
   }
 
+  /**
+   * Implicit class for [[java.io.File]] to add some usable fields and methods.
+   * Implementation of added features are provided in [[jp.sf.amateras.scala.nio.FileUtils]].
+   */
   implicit class FileOps(file: File){
     lazy val extension = FileUtils.getExtension(file)
 
