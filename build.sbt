@@ -12,6 +12,8 @@ resolvers += "amateras-snapshot-repo" at "http://amateras.sourceforge.jp/mvn-sna
 
 resolvers += "Local Maven Repository" at "file:///"+Path.userHome.absolutePath+"/.m2/repository"
 
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+
 parallelExecution in Test := false
 
 publishTo <<= (version) { version: String =>

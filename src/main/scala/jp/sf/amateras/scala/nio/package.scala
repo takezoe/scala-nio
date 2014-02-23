@@ -37,7 +37,7 @@ package object nio {
   /**
    * Close AutoCloseable with no exceptions. This is a utility method for internal use.
    */
-  private def closeQuietly(closeable: AutoCloseable): Unit = {
+  private[nio] def closeQuietly(closeable: AutoCloseable): Unit = {
     if(closeable != null){
       try {
         closeable.close()
@@ -48,6 +48,8 @@ package object nio {
   }
 
   implicit class FileOps(file: File){
+    lazy val extension = FileUtils.getExtension(file)
+
     def readAsBytes() = FileUtils.readAsBytes(file)
     def readAsString(charset: String = "UTF-8") = FileUtils.readAsString(file, charset)
     def write(content: Array[Byte]) = FileUtils.write(file, content)
@@ -55,6 +57,8 @@ package object nio {
     def remove() = FileUtils.remove(file)
     def moveTo(dest: File) = FileUtils.move(file, dest)
     def copyTo(dest: File) = FileUtils.copy(file, dest)
+    def lines(charset: String = "UTF-8") = FileUtils.readLines(file, charset)
+    def bytes(chunkSize: Int = 1024 * 8) = FileUtils.readBytes(file, chunkSize)
   }
 
 }
