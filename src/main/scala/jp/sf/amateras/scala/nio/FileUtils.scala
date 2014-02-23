@@ -103,13 +103,13 @@ object FileUtils {
   def write(file: File, content: String, charset: String = "UTF-8"): Unit = write(file, content.getBytes(charset))
 
   /**
-   * Returns iterator which returns lines (NOT including newline character(s)).
+   * Returns stream which returns lines (NOT including newline character(s)).
    *
    * @param file the file
    * @param charset the character encoding, default is UTF-8.
    * @return the stream which returns lines
    */
-  def readLines(file: File, charset: String = "UTF-8"): Iterator[String] = {
+  def readLines(file: File, charset: String = "UTF-8"): Stream[String] = {
     val reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))
 
     def readLineStream(): Stream[String] = {
@@ -126,13 +126,13 @@ object FileUtils {
   }
 
   /**
-   * Returns iterator which returns bytes with a specified chunk size.
+   * Returns stream which returns bytes with a specified chunk size.
    *
    * @param file the file
    * @param chunkSize the chunk size as bytes, default is 1024 * 8.
    * @return the stream which returns bytes
    */
-  def readBytes(file: File, chunkSize: Int = 1024 * 8): Iterator[Array[Byte]] = {
+  def readBytes(file: File, chunkSize: Int = 1024 * 8): Stream[Array[Byte]] = {
     val in     = new BufferedInputStream(new FileInputStream(file), chunkSize)
     val buffer = new Array[Byte](chunkSize)
 
