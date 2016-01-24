@@ -1,7 +1,6 @@
 package jp.sf.amateras.scala.nio
 
 import java.io._
-import java.util.Arrays
 
 /**
  * Provides some utility methods to operate files and directories.
@@ -26,8 +25,10 @@ object FileUtils {
    * If failed to rename, move by combination of copy and delete.
    */
   def move(file: File, dest: File): Unit = if(!file.renameTo(dest)){
-    copy(file, dest)
-    remove(file)
+    if(!file.renameTo(dest)){
+      copy(file, dest)
+      remove(file)
+    }
   }
 
   /**
@@ -44,18 +45,7 @@ object FileUtils {
       }
     }
     case x => using(new FileInputStream(x), new FileOutputStream(dest)){ case (in, out) =>
-      copyStream(in, out)
-    }
-  }
-
-  private def copyStream(in: InputStream, out: OutputStream): Unit = {
-    val buf = new Array[Byte](1024 * 8)
-    var length = 0
-    while(length != -1){
-      length = in.read(buf)
-      if(length > 0){
-        out.write(buf, 0, length)
-      }
+      StreamUtils.transfer(in, out)
     }
   }
 
@@ -65,11 +55,7 @@ object FileUtils {
    * @param file the file
    * @return the file content as byte array
    */
-  def readAsBytes(file: File): Array[Byte] =
-    using(new FileInputStream(file), new ByteArrayOutputStream()){ (in, out) =>
-      copyStream(in, out)
-      out.toByteArray
-    }
+  def readAsBytes(file: File): Array[Byte] = using(new FileInputStream(file))(StreamUtils.readAsBytes)
 
   /**
    * Read file content as string.
@@ -98,51 +84,95 @@ object FileUtils {
   def write(file: File, content: String, charset: String = "UTF-8"): Unit = write(file, content.getBytes(charset))
 
   /**
-   * Returns stream which returns lines (NOT including newline character(s)).
+   * Write stream contents to file.
    *
    * @param file the file
-   * @param charset the character encoding, default is UTF-8.
-   * @return the stream which returns lines
+   * @param in the input stream
    */
-  def readLines(file: File, charset: String = "UTF-8"): Stream[String] = {
-    val reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))
-
-    def readLineStream(): Stream[String] = {
-      reader.readLine() match {
-        case null => {
-          closeQuietly(reader)
-          Stream.empty
-        }
-        case line => line #:: readLineStream()
-      }
-    }
-
-    readLineStream()
+  def write(file: File, in: InputStream): Unit = using(new FileOutputStream(file)){ out =>
+    StreamUtils.transfer(in, out)
   }
 
   /**
-   * Returns stream which returns bytes with a specified chunk size.
+   * Write file contents to stream.
    *
    * @param file the file
-   * @param chunkSize the chunk size as bytes, default is 1024 * 8.
-   * @return the stream which returns bytes
+   * @param out the output stream
    */
-  def readBytes(file: File, chunkSize: Int = 1024 * 8): Stream[Array[Byte]] = {
-    val in     = new BufferedInputStream(new FileInputStream(file), chunkSize)
-    val buffer = new Array[Byte](chunkSize)
+  def writeTo(file: File, out: OutputStream): Unit = using(new FileInputStream(file)){ in =>
+    StreamUtils.transfer(in, out)
+  }
 
-    def readBytesStream: Stream[Array[Byte]] = {
-      in.read(buffer) match {
-        case -1 => {
-          closeQuietly(in)
-          Stream.empty
-        }
-        case length => Arrays.copyOf(buffer, length) #:: readBytesStream
-      }
+  /**
+   * Process each lines of the file.
+   *
+   * @param file the file
+   * @param charset the character encoding, default is UTF-8.
+   * @param f the function to process lines
+   */
+  def foreachLines(file: File, charset: String = "UTF-8")(f: String => Unit): Unit =
+    using(new FileInputStream(file)){ in =>
+      StreamUtils.foreachLines(in, charset)(f)
     }
 
-    readBytesStream
-  }
+  /**
+   * Process each chunked bytes of the file.
+   *
+   * @param file the file
+   * @param chunkSize the chunk size (bytes), default is 1024 * 8.
+   * @param f the function to process lines
+   */
+  def foreachBytes(file: File, chunkSize: Int = 1024 * 8)(f: Array[Byte] => Unit): Unit =
+    using(new FileInputStream(file)){ in =>
+      StreamUtils.foreachBytes(in, chunkSize)(f)
+    }
+
+//  /**
+//   * Returns stream which returns lines (NOT including newline character(s)).
+//   *
+//   * @param file the file
+//   * @param charset the character encoding, default is UTF-8.
+//   * @return the stream which returns lines
+//   */
+//  def readLines(file: File, charset: String = "UTF-8"): Stream[String] = {
+//    val reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))
+//
+//    def readLineStream(): Stream[String] = {
+//      reader.readLine() match {
+//        case null => {
+//          closeQuietly(reader)
+//          Stream.empty
+//        }
+//        case line => line #:: readLineStream()
+//      }
+//    }
+//
+//    readLineStream()
+//  }
+//
+//  /**
+//   * Returns stream which returns bytes with a specified chunk size.
+//   *
+//   * @param file the file
+//   * @param chunkSize the chunk size as bytes, default is 1024 * 8.
+//   * @return the stream which returns bytes
+//   */
+//  def readBytes(file: File, chunkSize: Int = 1024 * 8): Stream[Array[Byte]] = {
+//    val in     = new BufferedInputStream(new FileInputStream(file), chunkSize)
+//    val buffer = new Array[Byte](chunkSize)
+//
+//    def readBytesStream: Stream[Array[Byte]] = {
+//      in.read(buffer) match {
+//        case -1 => {
+//          closeQuietly(in)
+//          Stream.empty
+//        }
+//        case length => Arrays.copyOf(buffer, length) #:: readBytesStream
+//      }
+//    }
+//
+//    readBytesStream
+//  }
 
   def getExtension(file: File): Option[String] = file.getName.lastIndexOf('.') match {
     case -1 => None
