@@ -1,5 +1,9 @@
 package jp.sf.amateras.scala
 
+import java.io._
+
+import jp.sf.amateras.scala.nio.file.FileUtils
+
 package object nio {
 
   def using[A, Z](r1: Resource[A])(action: (A) => Z): Z = try {
@@ -63,5 +67,28 @@ package object nio {
     }
   }
 
+  /**
+   * Implicit class for [[java.io.InputStream]] to add some usable methods.
+   * Implementation of added features are provided in [[jp.sf.amateras.scala.nio.StreamUtils]].
+   */
+  implicit class InputStreamOps(in: InputStream){
+    def readAsBytes(): Array[Byte] = StreamUtils.readAsBytes(in)
+    def readAsString(charset: String = "UTF-8"): String = StreamUtils.readAsString(in, charset)
+    def writeTo(file: File): Unit = FileUtils.write(file, in)
+    def writeTo(out: OutputStream): Unit = StreamUtils.transfer(in, out)
+    def using[T](f: InputStream => T): T = jp.sf.amateras.scala.nio.using(in)(f)
+    def reader(charset: String = "UTF-8"): BufferedReader = new BufferedReader(new InputStreamReader(in, charset))
+  }
+
+  /**
+   * Implicit class for [[java.io.OutputStream]] to add some usable methods.
+   * Implementation of added features are provided in [[jp.sf.amateras.scala.nio.StreamUtils]].
+   */
+  implicit class OutputStreamOps(out: OutputStream){
+    def writeFrom(file: File): Unit = FileUtils.writeTo(file, out)
+    def writeFrom(in: InputStream): Unit = StreamUtils.transfer(in, out)
+    def using[T](f: OutputStream => T): T = jp.sf.amateras.scala.nio.using(out)(f)
+    def writer(charset: String = "UTF-8"): BufferedWriter = new BufferedWriter(new OutputStreamWriter(out, charset))
+  }
 
 }
