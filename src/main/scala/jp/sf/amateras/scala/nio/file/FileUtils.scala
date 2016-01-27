@@ -1,6 +1,8 @@
-package jp.sf.amateras.scala.nio
+package jp.sf.amateras.scala.nio.file
 
 import java.io._
+
+import jp.sf.amateras.scala.nio._
 
 /**
  * Provides some utility methods to operate files and directories.

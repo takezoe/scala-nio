@@ -1,6 +1,7 @@
-package jp.sf.amateras.scala.nio
+package jp.sf.amateras.scala.nio.file
 
 import java.io._
+
 import org.scalatest.FunSuite
 
 class FileUtilsTest extends FunSuite {

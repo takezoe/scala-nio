@@ -1,4 +1,4 @@
-package jp.sf.amateras.scala.nio
+package jp.sf.amateras.scala.nio.file
 
 import java.io._
 import java.util.jar._
@@ -6,6 +6,8 @@ import java.util.zip._
 
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashSet
+
+import jp.sf.amateras.scala.nio._
 
 /**
  * Provides utility methods to archive and extract. These methods are copied from sbt-io.
