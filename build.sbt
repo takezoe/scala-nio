@@ -4,7 +4,7 @@ organization := "jp.sf.amateras"
 
 version := "0.0.1"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.7"
 
 resolvers += "amateras-release-repo" at "http://amateras.sourceforge.jp/mvn/"
 
@@ -12,7 +12,7 @@ resolvers += "amateras-snapshot-repo" at "http://amateras.sourceforge.jp/mvn-sna
 
 resolvers += "Local Maven Repository" at "file:///"+Path.userHome.absolutePath+"/.m2/repository"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
 parallelExecution in Test := false
 
