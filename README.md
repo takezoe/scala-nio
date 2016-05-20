@@ -3,6 +3,12 @@ scala-nio
 
 Simple I/O library for Scala
 
+```scala
+resolvers += "amateras-repo" at "http://amateras.sourceforge.jp/mvn/"
+
+libraryDependencies += "jp.sf.amateras" %% "scala-nio" % "0.0.1"
+```
+
 ## Loan pattern
 
 Loan pattern is available for `AutoCloseable` resources. Also some utility methods are added to `java.io.InputStream` and `java.io.OutputStream`.
