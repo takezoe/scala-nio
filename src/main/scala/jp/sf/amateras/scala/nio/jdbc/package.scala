@@ -114,7 +114,7 @@ package object jdbc {
    * String interpolation to write variable embeddable SQL
    */
   implicit class SqlStringInterpolation(val sc: StringContext) extends AnyVal {
-    def sql(args: Any*): (String, Seq[Any]) = (sc.parts.mkString("?"), args.toSeq)
+    def sql(args: Any*): SqlTemplate = SqlTemplate(sc.parts.mkString("?"), args.toSeq)
   }
 
 }
