@@ -25,15 +25,17 @@ object JDBCUtils {
     }
   }
 
-  def selectInt(conn: Connection, template: SqlTemplate): Int = selectFirst[Int](conn, template).getOrElse(0)
+  def selectInt(conn: Connection, template: SqlTemplate): Int =
+    selectFirst[Int](conn, template)(_.getInt(1)).getOrElse(0)
 
-  def selectString(conn: Connection, template: SqlTemplate): String = selectFirst[String](conn, template).getOrElse("")
+  def selectString(conn: Connection, template: SqlTemplate): String =
+    selectFirst[String](conn, template)(_.getString(1)).getOrElse("")
 
-  def selectFirst[T](conn: Connection, template: SqlTemplate)(implicit m: ClassTag[T]): Option[T] = {
+  def selectFirst[T](conn: Connection, template: SqlTemplate)(f: ResultSet => T): Option[T] = {
     execute(conn, template){ stmt =>
       using(stmt.executeQuery()){ rs =>
         if(rs.next){
-          Some(TypeMapper.get[T](rs, 1))
+          Some(f(rs))
         } else {
           None
         }
